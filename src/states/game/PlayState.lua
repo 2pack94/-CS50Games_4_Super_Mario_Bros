@@ -20,7 +20,7 @@ function PlayState:init()
     -- the movement of all objects should get stopped when the player dies
     self.movement_stopped = false
     -- instantiate Player object
-    self.player = Player(0, 0, self.level)
+    self.player = Player(0, 0, nil)
 
     self:createNewLevel()
 end
