@@ -2,8 +2,6 @@
     GD50
     Super Mario Bros. Remake
 
-    -- StartState Class --
-
     Author: Colton Ogden
     cogden@cs50.harvard.edu
 
@@ -46,7 +44,7 @@ function GenerateTileSets(quads, num_tile_sets_x, num_tile_sets_y, num_tiles_x, 
     local table_counter = 0     -- counts the number of tables in the tilesets table (number of tilesets)
     local sheet_width = num_tile_sets_x * num_tiles_x   -- number of tiles in the tile-spritesheet horizontally
 
-    -- itereate over all tilesets
+    -- iterate over all tilesets
     for tileset_y = 1, num_tile_sets_y do
         for tileset_x = 1, num_tile_sets_x do
             -- insert a table for a tileset
@@ -64,36 +62,6 @@ function GenerateTileSets(quads, num_tile_sets_x, num_tile_sets_y, num_tiles_x, 
     end
 
     return tilesets
-end
-
---[[
-    modified Bubble Sort (reverse)
-    the elements in target_tbl are sorted according to the values in helper_tbl
-    the element in target_tbl with the smallest corresponding value in helper_tbl will be the last and vice versa
-    return: reverse sorted target_tbl, helper_tbl
-]]
-function reverseSortWithHelperTbl(target_tbl, helper_tbl)
-    for i = 1, #target_tbl do
-        local swaps = 0
-        for j = 1, #target_tbl - i do
-            if helper_tbl[j] < helper_tbl[j + 1] then
-                swaps = swaps + 1
-
-                local tmp = helper_tbl[j]
-                helper_tbl[j] = helper_tbl[j + 1]
-                helper_tbl[j + 1] = tmp
-
-                tmp = target_tbl[j]
-                target_tbl[j] = target_tbl[j + 1]
-                target_tbl[j + 1] = tmp
-            end
-        end
-        if swaps == 0 then
-            break
-        end
-    end
-
-    return target_tbl, helper_tbl
 end
 
 --[[

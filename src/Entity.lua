@@ -68,7 +68,7 @@ function Entity:init(def)
     self.is_remove = false
     -- if entity collides with other entities. If false, rebounding between entities gets disabled, but the collision callback functions are still triggered
     self.collides_with_others = true
-    -- store the side with which the entity collided with something else for every frame (only 1 side can be set to true)
+    -- store the side with which the entity collided with something else for every frame
     -- if entity collided with an object (with a rebound)
     self.is_collision_obj_lrtb = {false, false, false, false}
     -- if entity collided with an object or is touching the side of one (with or without a rebound)
@@ -134,7 +134,7 @@ function Entity:doCollideWithObject(self_collision_data, object) end
 
 -- triggered if entity dies on screen. The death animation happens implicitly due to the fact that self.is_alive = false disables collisions.
 -- If the entity dies off screen (e.g. when falling into a chasm), this function does not need to be called
--- override this functions to get a custom death behaviour
+-- override this functions to get a custom death behavior
 function Entity:onScreenDeath()
     self.is_alive = false
     self.vertical_direction = 'down'
@@ -159,7 +159,7 @@ function Entity:checkObjectCollisions()
         -- objects/ tiles that the entity touches, but that it did not move into e.g. the wall at which the entity is standing
         -- these objects do not need to handle a collision and the entity does not need to get rebounded on them
         -- used to set the self.is_slight_collision_obj_lrtb flag
-        local objects_slighly_collided = {}
+        local objects_slightly_collided = {}
         -- list of absolute rebound shift values. contains either the entity shift_x or shift_y value, depending on whats bigger
         -- used to sort the objects later after the collision sizes
         local shift_abs_list = {}
@@ -167,8 +167,9 @@ function Entity:checkObjectCollisions()
         -- convert coordinates of all 4 entity boundary corners to tile grid coordinates to select a subset of all tiles to use for collision checks.
         -- Tiles that get considered for the collision detection are:
         --      all tiles that the entity intersects with (also slight intersections where the coordinates of the overlapping edges are exactly the same)
-        --      the tiles directly above and left of the entity which he doesn't collide with or just have a slight collision
-        -- in a non-tile based platformer all objects would need to be organized in a quad tree data structure that spatially partitions the game world in order to do efficient collision detection.
+        --      the tiles directly above and left of the entity which it doesn't collide with or just have a slight collision
+        -- in a non-tile based platformer all objects would need to be organized in a quad tree data structure
+        -- that spatially partitions the game world in order to do efficient collision detection.
         local check_x_start = math.floor(hitbox.x / TILE_SIZE)
         local check_x_end = math.floor((hitbox.x + hitbox.width) / TILE_SIZE) + 1
         local check_y_start = math.floor(hitbox.y / TILE_SIZE)
@@ -177,12 +178,15 @@ function Entity:checkObjectCollisions()
         for x = check_x_start, check_x_end do
             for y = check_y_start, check_y_end do
                 if self.level.tiles[y] and self.level.tiles[y][x] and self.level.tiles[y][x].is_collidable then
+                    if IS_DEBUG then
+                        self.level.tiles[y][x].highlight_check_col = true
+                    end
                     local is_intersect, shift_x, shift_y = hitbox:getDisplacement(self.level.tiles[y][x])
                     if is_intersect then
                         table.insert(objects_collided, self.level.tiles[y][x])
                         table.insert(shift_abs_list, math.max(math.abs(shift_x), math.abs(shift_y)))
                     elseif hitbox:intersectsSlightly(self.level.tiles[y][x]) then
-                        table.insert(objects_slighly_collided, self.level.tiles[y][x])
+                        table.insert(objects_slightly_collided, self.level.tiles[y][x])
                     end
                 end
             end
@@ -195,7 +199,7 @@ function Entity:checkObjectCollisions()
                     table.insert(objects_collided, object)
                     table.insert(shift_abs_list, math.max(math.abs(shift_x), math.abs(shift_y)))
                 elseif hitbox:intersectsSlightly(object) then
-                    table.insert(objects_slighly_collided, object)
+                    table.insert(objects_slightly_collided, object)
                 end
             end
         end
@@ -203,11 +207,13 @@ function Entity:checkObjectCollisions()
         -- reverse sort the objects_collided array after the biggest shift_abs value.
         -- the highest shift_abs is obtained from a collision with an object whose center is the closest to the center of the entity (on each dimension).
         -- the collisions get resolved in this order. The advantage is, that if the entity collides with a corner of an object,
-        -- but also with other objects (with a potentially bigger collision area), the major collisions get resolved first and the corner collision cannot push the entity in a potentially wrong direction.
+        -- but also with other objects (with a potentially bigger collision area),
+        -- the major collisions get resolved first and the corner collision cannot push the entity in a potentially wrong direction.
         -- This is needed for entities with hitboxes that don't have special "shift" flags. It also has the positive side effect to get the optimal mount object.
-        objects_collided = reverseSortWithHelperTbl(objects_collided, shift_abs_list)
+        sortReverseUnstableWithHelperTbl(objects_collided, shift_abs_list)
 
-        -- store entity collision data for the collision callback function in order to collide with every object in the same way as before the rebound (at least for the current hitbox)
+        -- store entity collision data for the collision callback function in order to collide with every object in the same way as before the rebound
+        -- (at least for the current hitbox)
         local entity_collision_data = {entity = self,
             hitbox = deepcopy(hitbox),
             dx = self.dx, dy = self.dy
@@ -218,7 +224,7 @@ function Entity:checkObjectCollisions()
             local intersects_lrtb = hitbox:getIntersectingEdgeHitbox(object)
 
             -- if do_collision = true, trigger the collision callback functions
-            -- if the entity intersects only slightly after the rebound, still trigger the collision logic (e.g. when jumped into 2 objects simultaniously)
+            -- if the entity intersects only slightly after the rebound, still trigger the collision logic (e.g. when jumped into 2 objects simultaneously)
             -- if the entity is too far away from the object after a rebound, don't trigger the collision logic
             -- don't trigger the collision twice with the same object, possibly with another hitbox of the same entity (only do the rebound).
             -- first, a collision with the highest priority (first) entity hitbox is made with the object that this hitbox has the biggest collision size with.
@@ -270,6 +276,9 @@ function Entity:checkObjectCollisions()
 
             -- trigger collision callback functions
             if do_collision then
+                if IS_DEBUG then
+                    object.highlight_is_col = true
+                end
                 table.insert(self.collided_objects, object)
 
                 object:doCollideWithEntity(entity_collision_data)
@@ -278,7 +287,7 @@ function Entity:checkObjectCollisions()
         end
 
         -- after rebounding the hitbox, check on which sides the entity still slightly collides with objects that were previously selected as slightly colliding objects.
-        for _, object in pairs(objects_slighly_collided) do
+        for _, object in pairs(objects_slightly_collided) do
             local side = 1
             for _, is_slight_collision in pairs(hitbox:getSlightlyIntersectingEdge(object)) do
                 if is_slight_collision and object.is_solid then
@@ -289,7 +298,7 @@ function Entity:checkObjectCollisions()
         end
     end
 
-    -- unmount from object if no bottom collision occured
+    -- unmount from object if no bottom collision occurred
     if not self.is_slight_collision_obj_lrtb[4] then
         self.mount = nil
     end
@@ -306,7 +315,8 @@ function Entity:checkObjectCollisions()
 end
 
 -- check collisions between all other entities
--- The difference between object collisions is that both entities that are part of the collision can get rebounded. Also every entity checks collisions against all other entities.
+-- The difference between object collisions is that both entities that are part of the collision can get rebounded.
+-- Also every entity checks collisions against all other entities.
 -- for every collision, collision callback functions for both entities get triggered.
 function Entity:checkEntityCollisions()
     if not self.is_alive then
@@ -317,7 +327,8 @@ function Entity:checkEntityCollisions()
     for _, hitbox in pairs(self.hitboxes) do
         -- entities that the entity collides/ intersects with
         local entities_collided = {}
-        -- list of absolute rebound shift values. contains either the self shift_x or shift_y value from the opponent entity hitbox with the biggest collision size, depending on whats bigger
+        -- list of absolute rebound shift values. contains either the self shift_x or shift_y value
+        -- from the opponent entity hitbox with the biggest collision size, depending on whats bigger
         -- used to sort the entities later after the collision sizes
         local shift_abs_list = {}
 
@@ -341,8 +352,9 @@ function Entity:checkEntityCollisions()
         end
 
         -- reverse sort the entities_collided array after the biggest shift_abs value. (see object collisions)
-        entities_collided = reverseSortWithHelperTbl(entities_collided, shift_abs_list)
-        -- store self collision data for the collision callback function in order to collide with every other entity in the same way as before the rebound (at least for the current hitbox)
+        sortReverseUnstableWithHelperTbl(entities_collided, shift_abs_list)
+        -- store self collision data for the collision callback function in order to collide with every other entity in the same way as before the rebound
+        -- (at least for the current hitbox)
         local self_collision_data = {entity = self,
             hitbox = deepcopy(hitbox),
             dx = self.dx, dy = self.dy
@@ -361,15 +373,18 @@ function Entity:checkEntityCollisions()
                 -- if the entity intersects only slightly after the rebound, still trigger the collision logic
                 -- if the entity is too far away from the other entity after a rebound, don't trigger the collision logic
                 -- don't trigger the collision twice with the same entity (only do the rebound).
-                -- This can happen if more than 1 hitbox of an entity is colliding with another one or if an entity gets pushed back into the same entity again because of a later collision in the same frame.
+                -- This can happen if more than 1 hitbox of an entity is colliding with another one
+                -- or if an entity gets pushed back into the same entity again because of a later collision in the same frame.
                 -- first, a collision with the highest priority (first) self hitbox is made with the highest priority (first) other entity hitbox
                 local do_collision = false
                 if hitbox:intersectsSlightly(entity_hitbox) and not table.contains(self.collided_entities, entity) then
                     do_collision = true
                 end
 
-                -- the shift factor specifies the shift ratio that the current hitbox of self will get shifted during rebound. The other entity will then get shifted by the remaining part.
-                -- the shift factor is determined from the speed ratio of the entities. The higher the speed of self in the collision surface direction, the higher shift_factor becomes
+                -- the shift factor specifies the shift ratio that the current hitbox of self will get shifted during rebound.
+                -- The other entity will then get shifted by the remaining part.
+                -- the shift factor is determined from the speed ratio of the entities.
+                -- The higher the speed of self in the collision surface direction, the higher shift_factor becomes.
                 -- if both entities have no velocity while colliding, they will both get shifted 50/50
                 -- if a pushing mechanic is desired, it can be implemented at another place outside of the collision detection function
                 local shift_factor = 0.5
@@ -447,7 +462,6 @@ function Entity:checkEntityCollisions()
                             is_rebound_opponent = false
                             shift_factor = 1
                         end
-
                     end
                     -- rebound self by the amount specified by shift_factor and then the opponent by the rest amount
                     if is_rebound_self then
@@ -492,7 +506,8 @@ function Entity:checkEntityCollisions()
                     entity:doCollideWithEntity(opponent_collision_data, self_collision_data)
                     self:doCollideWithEntity(self_collision_data, opponent_collision_data)
 
-                    -- if an entity just got rebounded (for the first time with this opponent entity), recursively call this function again to check if the entity collides with a new entity after the rebound
+                    -- if an entity just got rebounded (for the first time with this opponent entity),
+                    -- recursively call this function again to check if the entity collides with a new entity after the rebound
                     -- This goes on until all collisions are resolved. It increases the accuracy of the simulation.
                     -- e.g. when multiple entities are stacked on top of each other and every entity falls down as a result of gravity,
                     -- not every entity might detect a collision in the same frame depending on the entity update order.
@@ -581,8 +596,16 @@ function Entity:render()
     -- set the origin to the center with the x, y origin offset. The mirroring will be applied relative to the origin. This keeps the texture at its place when mirroring.
     -- the x, y position has to be adjusted by the same origin shift amount, to render the entity at the correct position.
     love.graphics.draw(gTextures[self.texture], gFrames[self.texture][self.animation:getCurrentFrame()],
-        math.floor(self.x) + self.width / 2, math.floor(self.y) + self.height / 2, 0,           -- x, y position, orientation (0)
+        math.floor(self.x + self.width / 2), math.floor(self.y + self.height / 2), 0,           -- x, y position, orientation (0)
         self.direction == 'left' and -1 or 1, self.vertical_direction == 'down' and -1 or 1,    -- x, y scale factor
         self.width / 2, self.height / 2                                                         -- x, y origin offset
     )
+
+    if IS_DEBUG then
+        love.graphics.setColor(255/255, 0/255, 255/255, 255/255)
+        for _, hitbox in pairs(self.hitboxes) do
+            love.graphics.rectangle('line', math.floor(hitbox.x), math.floor(hitbox.y), hitbox.width, hitbox.height)
+        end
+        love.graphics.setColor(255/255, 255/255, 255/255, 255/255)
+    end
 end

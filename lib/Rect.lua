@@ -136,7 +136,7 @@ end
 --[[
     Rebound *self by its displacement values (update position)
     see: https://github.com/noooway/love2d_arkanoid_tutorial/wiki/Resolving-Collisions
-    Displacemant values can be obtained from Rect:getDisplacement()
+    Displacement values can be obtained from Rect:getDisplacement()
     Set the bigger shift amount to 0. Rebound *self only with the smaller shift value (smallest effort to resolve overlap).
     shift_x, shift_y: input. x and y shift values.
     rectangle: input. optional/ can be nil. Rect object. rectangle at which *self gets rebounded.

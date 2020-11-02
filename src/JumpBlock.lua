@@ -45,7 +45,7 @@ function JumpBlock:doCollideWithEntity(collision_data)
             collision_data.entity.score = collision_data.entity.score + self.coin_points
             -- stop the block if it was moving
             self:stopMovement()
-            -- change to emtpy block, so this code segment will only be executed once
+            -- change to empty block, so this code segment will only be executed once
             self.frame_id = JUMP_BLOCK_FRAME_ID_EMPTY
 
             -- use a tween timer to have a up- down moving effect
@@ -64,7 +64,7 @@ function JumpBlock:doCollideWithEntity(collision_data)
             self.coin = GameObject({x = self.x, y = self.y, texture = 'coins', frame_id = self.coin_frame_id})
             table.insert(self.level.objects, self.coin)
 
-            -- play the corresponding coind sound.
+            -- play the corresponding coin sound.
             -- stop previous sounds in case multiple blocks were hit at the same time to not have a overlay effect.
             gSounds['coin1']:stop()
             gSounds['coin2']:stop()

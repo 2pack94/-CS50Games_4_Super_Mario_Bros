@@ -26,9 +26,9 @@ function GameObject:init(def)
     self.texture = def.texture
     -- specifies the type and texture. index in the gFrames table to pick a quad/ texture from the spritesheet
     self.frame_id = def.frame_id or 1
-    -- if true, collision callback methods e.g. doCollideWithEntity() get called if an Entity collides with the object.
+    -- if false, no collisions will be calculated with that object.
     self.is_collidable = def.is_collidable or false
-    -- If solid, Entities get rebouned on this object in the collision detection function
+    -- If solid, Entities get rebounded on this object in the collision detection function
     self.is_solid = def.is_solid or false
     -- specify this for objects that need a level reference
     self.level = def.level or nil
@@ -50,5 +50,14 @@ function GameObject:stopMovement() end
 function GameObject:update(dt) end
 
 function GameObject:render()
-    love.graphics.draw(gTextures[self.texture], gFrames[self.texture][self.frame_id], self.x, self.y)
+    love.graphics.draw(gTextures[self.texture], gFrames[self.texture][self.frame_id], math.floor(self.x), math.floor(self.y))
+
+    if IS_DEBUG then
+        if self.highlight_is_col then
+            love.graphics.setColor(255/255, 0/255, 0/255, 120/255)
+            love.graphics.rectangle("fill", math.floor(self.x), math.floor(self.y), self.width, self.height)
+            love.graphics.setColor(255/255, 255/255, 255/255, 255/255)
+        end
+        self.highlight_is_col = false
+    end
 end

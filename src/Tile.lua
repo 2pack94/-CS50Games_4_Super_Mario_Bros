@@ -7,7 +7,7 @@
 
     This can be either an empty tile or a ground tile.
     Only ground tiles are solid. Ground tiles can have toppers.
-    The level ground and platforms are built from Tile objetcs.
+    The level ground and platforms are built from Tile objects.
     All Tile objects are inside the Tile table in GameLevel.
 ]]
 
@@ -28,15 +28,19 @@ function Tile:init(grid_x, grid_y, frame_id, topper_frame_id, tileset, topperset
     -- always 0. members needed for collision detection
     self.dx, self.dy = 0, 0
 
-    self.tileset = tileset                      -- index in the tilesets table that picks the subtable for a specific tileset. used in the draw function.
-    self.frame_id = frame_id                    -- specifies the type and texture of the tile. can be nil for an empty tile. index in the tileset subtable to pick a tile from the tileset
-    self.topperset = topperset                  -- index in the toppersets table that picks the subtable for a specific topperset. used in the draw function.
-    self.topper_frame_id = topper_frame_id      -- specifies the type and texture of the topper. can be nil for an empty topper (no topper). index in the topperset subtable to pick a topper from the topperset
+    -- index in the tilesets table that picks the subtable for a specific tileset. used in the draw function.
+    self.tileset = tileset
+    -- specifies the type and texture of the tile. can be nil for an empty tile. index in the tileset subtable to pick a tile from the tileset
+    self.frame_id = frame_id
+    -- index in the toppersets table that picks the subtable for a specific topperset. used in the draw function.
+    self.topperset = topperset
+    -- specifies the type and texture of the topper. can be nil for an empty topper (no topper). index in the topperset subtable to pick a topper from the topperset
+    self.topper_frame_id = topper_frame_id
 
     -- Check if this frame ID is whitelisted as collidable in the global COLLIDABLE_TILES table.
-    -- if true, collision callback methods e.g. doCollideWithEntity() get called if an Entity collides with the Tile.
+    -- if false, no collisions will be calculated with that tile
     self.is_collidable = table.contains(COLLIDABLE_TILES, self.frame_id)
-    -- If solid, Entities get rebouned on this Tile in the collision detection function
+    -- If solid, Entities get rebounded on this Tile in the collision detection function
     self.is_solid = self.is_collidable
 end
 
@@ -61,5 +65,19 @@ function Tile:render()
     -- draw a topper on the tile. only a Tile at the top should have a topper
     if self.topper_frame_id then
         love.graphics.draw(gTextures['toppers'], gFrames['toppersets'][self.topperset][self.topper_frame_id], self.x, self.y)
+    end
+
+    if IS_DEBUG then
+        if self.highlight_is_col then
+            love.graphics.setColor(255/255, 0/255, 0/255, 120/255)
+            love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+            love.graphics.setColor(255/255, 255/255, 255/255, 255/255)
+        elseif self.highlight_check_col then
+            love.graphics.setColor(255/255, 255/255, 255/255, 120/255)
+            love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+            love.graphics.setColor(255/255, 255/255, 255/255, 255/255)
+        end
+        self.highlight_check_col = false
+        self.highlight_is_col = false
     end
 end

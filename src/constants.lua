@@ -20,6 +20,10 @@ VIRTUAL_HEIGHT = 216
 
 GAME_TITLE = 'Super Alien Bros.'
 
+-- if true, make hitboxes visible
+-- IS_DEBUG = true
+IS_DEBUG = false
+
 -- global tile size
 -- the game world consists out of a grid of regular-shaped images called tiles.
 -- the tile size for this game is 16 x 16. Most of the game objects are exactly this size.

@@ -29,8 +29,6 @@ function SnailChasingState:updateStage1(dt)
         self.owner.new_state = math.random() < 0.5 and 'idle' or 'moving'
     end
 
-    self.owner:updatePosition(dt)
-
     -- change direction based on player x coordinate
     -- have a hysteresis, so that the snail can not change its direction every frame when it reached self.owner.player.x
     if self.owner.x > self.owner.player.x + 1 then
@@ -55,6 +53,8 @@ function SnailChasingState:updateStage1(dt)
     if not self.owner.falls_off_cliffs and not containsSolidObject(ground_objs) then
         self.owner.dx = 0
     end
+
+    self.owner:updatePosition(dt)
 
     self.owner:checkObjectCollisions()
 end

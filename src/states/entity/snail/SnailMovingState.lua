@@ -49,8 +49,6 @@ function SnailMovingState:updateStage1(dt)
         self.owner.new_state = 'chasing'
     end
 
-    self.owner:updatePosition(dt)
-
     local ground_objs = {}
     -- when moving left scan objects on the bottom left of the snail
     -- when moving right scan objects on the bottom right of the snail
@@ -71,6 +69,8 @@ function SnailMovingState:updateStage1(dt)
             self.owner.dx = 0
         end
     end
+
+    self.owner:updatePosition(dt)
 
     self.owner:checkObjectCollisions()
 end

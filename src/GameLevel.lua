@@ -38,7 +38,7 @@ function GameLevel:generate()
 
     -- level generation parameters
     -- height, width and distances are measured in tiles. The height is measured from bottom to top (in reverse y-axis direction)
-    -- the player must be able to traverse the level from left to right and the other way around without beeing blocked.
+    -- the player must be able to traverse the level from left to right and the other way around without being blocked.
     -- player jump height: about 3.5 tiles, player height: 1.25 tiles
     -- the spawn probability of some objects can be a bit lower than specified in the parameter, because the object might have restrictions on where it can spawn.
     -- chasm variables
@@ -62,7 +62,7 @@ function GameLevel:generate()
     self.platform_p = 0.15              -- per column probability to generate a platform. range: 0 .. 1
     self.platform_width_max = 6         -- maximum width of a platform to generate
     self.platform_width_min = 2         -- minimum width of a platform to generate
-    local platform_height = 0           -- heigth of the current platform
+    local platform_height = 0           -- height of the current platform
     local platform_ground_d = 0         -- distance between the current platform and the ground
     self.platform_ground_d_max = 2      -- maximum distance between a platform and the ground
     self.platform_ground_d_min = 2      -- minimum distance between a platform and the ground
@@ -520,7 +520,7 @@ function GameLevel:renderBackground(x)
                 math.floor(x + BACKGROUND_WIDTH * (i - 1)), VIRTUAL_HEIGHT / 2 + BACKGROUND_HEIGHT / 2 + BACKGROUND_HEIGHT * (j - 1))
         end
 
-        -- draw main backgound texture in the y center of the screen
+        -- draw main background texture in the y center of the screen
         love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background],
             math.floor(x + BACKGROUND_WIDTH * (i - 1)), VIRTUAL_HEIGHT / 2 - BACKGROUND_HEIGHT / 2)
     end

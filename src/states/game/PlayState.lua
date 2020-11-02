@@ -25,7 +25,7 @@ function PlayState:init()
     self:createNewLevel()
 end
 
--- geberate a new level, spawn enemies and put the player to the beginning of the level
+-- generate a new level, spawn enemies and put the player to the beginning of the level
 function PlayState:createNewLevel()
     -- increase the level length when creating the next level. maximum 200 Tiles
     self.level_length = math.min(math.ceil(VIRTUAL_WIDTH / TILE_SIZE + 10 * self.level_nr), 200)
@@ -64,6 +64,7 @@ function PlayState:update(dt)
         gSounds['back']:play()
         -- clear all timers (across all states)
         Timer.clear()
+        return
     end
 
     -- update all timers
@@ -92,6 +93,7 @@ function PlayState:update(dt)
         gStateMachine:change('start')
         -- clear all timers (across all states)
         Timer.clear()
+        return
     end
     -- go to the next level and give some points to the player if the level was finished
     if self.player.finished_level then

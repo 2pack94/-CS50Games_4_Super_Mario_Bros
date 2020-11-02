@@ -84,10 +84,10 @@ function Player:init(x, y, level)
     self.state_machine:change('idle')
 end
 
--- this function changes the player velocity based on the keybord input
+-- this function changes the player velocity based on the keyboard input
 -- the player does not immediately switch to another velocity, but he gets accelerated or decelerated to reach the target speed
 -- update the players position based on the velocity afterwards
--- return: true if there is a keyboard input, falsse otherwise
+-- return: true if there is a keyboard input, false otherwise
 function Player:doMovement(dt)
     local is_movement = false
     -- either PLAYER_MAX_WALK_SPEED or PLAYER_MAX_RUN_SPEED depending on if the running key is pressed
@@ -148,7 +148,7 @@ function Player:doCollideWithEntity(self_collision_data, opponent_collision_data
     -- if jumped on top of entity.
     -- if there would be spiked enemies that the player cannot jump on, an additional check would be needed here
     if self_collision_data.hitbox:getIntersectingEdgeHitbox(opponent_collision_data.hitbox)[4] then
-        -- change to jump state. Jumping off from an enemy has a different behaviour than jumping from the ground, so the jump type must be specified.
+        -- change to jump state. Jumping off from an enemy has a different behavior than jumping from the ground, so the jump type must be specified.
         self.new_state = 'jump'
         self.new_state_params = {type = 'enemy'}
 
